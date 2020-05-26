@@ -61,7 +61,7 @@ func resourceAppstreamImageBuilder() *schema.Resource {
                 Optional:     true,
             },
 
-            "image_name": {
+            "image_arn": {
                 Type:         schema.TypeString,
                 Required:     true,
             },
@@ -136,8 +136,8 @@ func resourceAppstreamImageBuilderCreate(d *schema.ResourceData, meta interface{
         CreateImageBuilderInputOpts.EnableDefaultInternetAccess = aws.Bool(v.(bool))
     }
 
-    if v, ok := d.GetOk("image_name"); ok {
-        CreateImageBuilderInputOpts.ImageName = aws.String(v.(string))
+    if v, ok := d.GetOk("image_arn"); ok {
+        CreateImageBuilderInputOpts.ImageArn = aws.String(v.(string))
     }
 
     if v, ok := d.GetOk("instance_type"); ok {
@@ -226,7 +226,7 @@ func resourceAppstreamImageBuilderRead(d *schema.ResourceData, meta interface{})
             d.Set("appstream_agent_version", v.AppstreamAgentVersion)
             d.Set("enable_default_internet_access", v.EnableDefaultInternetAccess)
             d.Set("instance_type", v.InstanceType)
-            d.Set("image_name", d.Get("image_name"))
+            d.Set("image_arn", d.Get("image_arn"))
             d.Set("state", v.State)
             if v.VpcConfig != nil {
                 vpc_attr := map[string]interface{}{}
