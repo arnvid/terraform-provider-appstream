@@ -37,3 +37,6 @@ website/vendor
 *.winfile eol=crlf
 /.vs
 node_modules
+
+
+go.sum
