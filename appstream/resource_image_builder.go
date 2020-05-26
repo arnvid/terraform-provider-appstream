@@ -64,6 +64,7 @@ func resourceAppstreamImageBuilder() *schema.Resource {
             "image_arn": {
                 Type:         schema.TypeString,
                 Required:     true,
+                ForceNew:	  true,
             },
 
             "instance_type": {
