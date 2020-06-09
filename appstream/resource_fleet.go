@@ -80,6 +80,12 @@ func resourceAppstreamFleet() *schema.Resource {
                 Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:	  true,
+			},
+			
+			"iam_role_arn": {
+                Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:	  true,
             },
 
             "instance_type": {
@@ -188,6 +194,10 @@ func resourceAppstreamFleetCreate(d *schema.ResourceData, meta interface{}) erro
 
 	if v, ok := d.GetOk("image_arn"); ok {
 		CreateFleetInputOpts.ImageArn = aws.String(v.(string))
+	}
+
+	if v, ok := d.GetOk("iam_role_arn"); ok {
+		CreateFleetInputOpts.IamRoleArn  = aws.String(v.(string))
 	}
 
 
@@ -350,6 +360,7 @@ func resourceAppstreamFleetRead(d *schema.ResourceData, meta interface{}) error 
 			d.Set("enable_default_internet_access", v.EnableDefaultInternetAccess)
 			d.Set("fleet_type", v.FleetType)
 			d.Set("image_arn", v.ImageArn)
+			d.set("iam_role_arn", v.IamRoleArn)
 			d.Set("instance_type", v.InstanceType)
 			d.Set("max_user_duration", v.MaxUserDurationInSeconds)
 
@@ -429,6 +440,13 @@ func resourceAppstreamFleetUpdate(d *schema.ResourceData, meta interface{}) erro
         log.Printf("[DEBUG] Modify Fleet")
         image_arn :=d.Get("image_arn").(string)
         UpdateFleetInputOpts.ImageArn = aws.String(image_arn)
+	}
+	
+	if d.HasChange("iam_role_arn") {
+        d.SetPartial("iam_role_arn")
+        log.Printf("[DEBUG] Modify Fleet")
+        iam_role_arn :=d.Get("iam_role_arn").(string)
+        UpdateFleetInputOpts.IamRoleArn = aws.String(iam_role_arn)
     }
 
     if d.HasChange("instance_type") {
