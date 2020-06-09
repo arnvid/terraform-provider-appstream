@@ -360,7 +360,7 @@ func resourceAppstreamFleetRead(d *schema.ResourceData, meta interface{}) error 
 			d.Set("enable_default_internet_access", v.EnableDefaultInternetAccess)
 			d.Set("fleet_type", v.FleetType)
 			d.Set("image_arn", v.ImageArn)
-			d.set("iam_role_arn", v.IamRoleArn)
+			d.Set("iam_role_arn", v.IamRoleArn)
 			d.Set("instance_type", v.InstanceType)
 			d.Set("max_user_duration", v.MaxUserDurationInSeconds)
 
