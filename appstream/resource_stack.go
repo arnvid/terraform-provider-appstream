@@ -60,6 +60,34 @@ func resourceAppstreamStack() *schema.Resource {
 				Type:     schema.TypeMap,
 				Optional: true,
 			},
+			"user_settings": {
+				Type: schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"file_download":{
+							Type: schema.TypeString,
+							Optional: true,
+						},
+						"file_upload":{
+							Type: schema.TypeString,
+							Optional: true,
+						},
+						"copy_from_local": {
+							Type: schema.TypeString,
+							Optional: true,
+						},
+						"copy_to_local": {
+							Type: schema.TypeString,
+							Optional: true,
+						},
+						"allow_local_device_printing": {
+							Type: schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -93,6 +121,11 @@ func resourceAppstreamStackCreate(d *schema.ResourceData, meta interface{}) erro
 	if v, ok := d.GetOk("storage_connectors"); ok {
 		storageConnectorConfigs := v.(*schema.Set).List()
 		CreateStackInputOpts.StorageConnectors = expandStorageConnectorConfigs(storageConnectorConfigs)
+	}
+
+	if v, ok := d.GetOk("user_settings"); ok {
+		userSettingConfigs := v.(*schema.Set).List()
+		CreateStackInputOpts.UserSettings = expandUserSettingConfigs(userSettingConfigs)
 	}
 
 	log.Printf("[DEBUG] Run configuration: %s", CreateStackInputOpts)
@@ -289,4 +322,54 @@ func expandStorageConnectorConfigs(storageConnectorConfigs []interface{}) []*app
 		storageConnectorConfig = append(storageConnectorConfig, config)
 	}
 	return storageConnectorConfig
+}
+
+func expandUserSettingConfigs(userSettingConfigs []interface{}) []*appstream.UserSetting {
+	userSettingConfig := []*appstream.UserSetting{}
+
+	for _, raw := range userSettingConfigs {
+		configAttributes := raw.(map[string]interface{})
+		configFileDownload := configAttributes["file_download"].(string)
+		configFileUpload := configAttributes["file_upload"].(string)
+		configCopyFromLocal := configAttributes["copy_from_local"].(string)
+		configCopytoLocal := configAttributes["copy_to_local"].(string)
+		configAllowLocalPrint := configAttributes["allow_local_device_printing"].(string)
+		if configAttributes["file_download"] != nil {
+			config := &appstream.UserSetting{
+				Action: aws.String("FILE_DOWNLOAD"),
+				Permission: aws.String(configFileDownload),
+			}
+			userSettingConfig = append(userSettingConfig, config)
+		}
+		if configAttributes["file_upload"] != nil {
+			config := &appstream.UserSetting{
+				Action: aws.String("FILE_UPLOAD"),
+				Permission: aws.String(configFileUpload),
+			}
+			userSettingConfig = append(userSettingConfig, config)
+		}
+		if configAttributes["copy_from_local"] != nil {
+			config := &appstream.UserSetting{
+				Action: aws.String("CLIPBOARD_COPY_FROM_LOCAL_DEVICE"),
+				Permission: aws.String(configCopyFromLocal),
+			}
+			userSettingConfig = append(userSettingConfig, config)
+		}
+		if configAttributes["copy_to_local"] != nil {
+			config := &appstream.UserSetting{
+				Action: aws.String("CLIPBOARD_COPY_TO_LOCAL_DEVICE"),
+				Permission: aws.String(configCopytoLocal),
+			}
+			userSettingConfig = append(userSettingConfig, config)
+		}
+		if configAttributes["allow_local_device_printing"] != nil {
+			config := &appstream.UserSetting{
+				Action: aws.String("PRINTING_TO_LOCAL_DEVICE"),
+				Permission: aws.String(configAllowLocalPrint),
+			}
+			userSettingConfig = append(userSettingConfig, config)
+		}
+
+	}
+	return userSettingConfig
 }
