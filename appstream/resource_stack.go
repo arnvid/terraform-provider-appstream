@@ -183,7 +183,12 @@ func resourceAppstreamStackRead(d *schema.ResourceData, meta interface{}) error 
 
 	svc := meta.(*AWSClient).appstreamconn
 
-	resp, err := svc.DescribeStacks(&appstream.DescribeStacksInput{})
+	var names []*string
+	stackName := d.Id()
+	names = append(names, &stackName)
+	describeStacksInput := appstream.DescribeStacksInput{Names: names}
+
+	resp, err := svc.DescribeStacks(&describeStacksInput)
 	if err != nil {
 		log.Printf("[ERROR] Error describing stacks: %s", err)
 		return err
