@@ -211,7 +211,12 @@ func resourceAppstreamImageBuilderRead(d *schema.ResourceData, meta interface{})
 
 	svc := meta.(*AWSClient).appstreamconn
 
-    resp, err := svc.DescribeImageBuilders(&appstream.DescribeImageBuildersInput{})
+	var names []*string
+	imageBuilderName := d.Id()
+	names = append(names, &imageBuilderName)
+	describeImageBuildersInput := appstream.DescribeImageBuildersInput{Names: names}
+
+    resp, err := svc.DescribeImageBuilders(&describeImageBuildersInput)
     if err != nil {
         log.Printf("[ERROR] Error describing Appstream Image Builder: %s", err)
         return err

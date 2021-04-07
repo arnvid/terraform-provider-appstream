@@ -337,7 +337,12 @@ func resourceAppstreamFleetCreate(d *schema.ResourceData, meta interface{}) erro
 func resourceAppstreamFleetRead(d *schema.ResourceData, meta interface{}) error {
 	svc := meta.(*AWSClient).appstreamconn
 
-	resp, err := svc.DescribeFleets(&appstream.DescribeFleetsInput{})
+	var names []*string
+	fleetName := d.Id()
+	names = append(names, &fleetName)
+	describeFleetsInput := appstream.DescribeFleetsInput{Names: names}
+
+	resp, err := svc.DescribeFleets(&describeFleetsInput)
 
 	if err != nil {
 		log.Printf("[ERROR] Error reading Appstream Fleet: %s", err)
