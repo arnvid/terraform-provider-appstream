@@ -1,14 +1,13 @@
 package appstream
 
 import (
-        "github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
-	homedir "github.com/mitchellh/go-homedir"
 	"log"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	homedir "github.com/mitchellh/go-homedir"
 )
 
-func Provider() terraform.ResourceProvider {
-	
+func Provider() *schema.Provider {
 	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"access_key": {
@@ -61,9 +60,11 @@ func Provider() terraform.ResourceProvider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-		    "appstream_stack":  		resourceAppstreamStack(),
-		    "appstream_image_builder":  resourceAppstreamImageBuilder(),
-		    "appstream_fleet":			resourceAppstreamFleet(),
+			"appstream_stack":                     resourceAppstreamStack(),
+			"appstream_image_builder":             resourceAppstreamImageBuilder(),
+			"appstream_stack_attachment":          resourceAppstreamStackAttachment(),
+			"appstream_fleet":                     resourceAppstreamFleet(),
+			"appstream_usage_report_subscription": resourceAppstreamUsageReportSubscription(),
 		},
 	}
 	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
@@ -100,7 +101,7 @@ func init() {
 		"token": "session token. A session token is only required if you are\n" +
 			"using temporary security credentials.",
 
-		"max_retries": "The maximum number of times an AWS API request is\n" +
+		"max_retries": "The maximum number of 	times an AWS API request is\n" +
 			"being executed. If the API request still fails, an error is\n" +
 			"thrown.",
 
@@ -137,18 +138,26 @@ func init() {
 		"assume_role_external_id": "The external ID to use when assuming the role. If omitted," +
 			" no external ID is passed to the AssumeRole call.",
 
+		"assume_role_duration_seconds": "The duration, in seconds, of the role session. " +
+			"The value specified can can range from 900 seconds (15 minutes) " +
+			"up to the maximum session duration that is set for the role. " +
+			"The maximum session duration setting can have a value from 1 hour to 12 hours. " +
+			"If you specify a value higher than this setting, the operation fails. For example, " +
+			"if you specify a session duration of 12 hours, but your administrator set the maximum " +
+			" session duration to 6 hours, your operation fails.",
+
 		"assume_role_policy": "The permissions applied when assuming a role. You cannot use," +
 			" this policy to grant further permissions that are in excess to those of the, " +
 			" role that is being assumed.",
 	}
 }
 func providerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
-	config := Config {
-        AccessKey:  d.Get("access_key").(string),
-		SecretKey:  d.Get("secret_key").(string),
-		Profile:    d.Get("profile").(string),
-		Token:      d.Get("token").(string),
-		Region:     d.Get("region").(string),
+	config := Config{
+		AccessKey:        d.Get("access_key").(string),
+		SecretKey:        d.Get("secret_key").(string),
+		Profile:          d.Get("profile").(string),
+		Token:            d.Get("token").(string),
+		Region:           d.Get("region").(string),
 		terraformVersion: terraformVersion,
 	}
 
@@ -165,7 +174,11 @@ func providerConfigure(d *schema.ResourceData, terraformVersion string) (interfa
 		config.AssumeRoleARN = assumeRole["role_arn"].(string)
 		config.AssumeRoleSessionName = assumeRole["session_name"].(string)
 		config.AssumeRoleExternalID = assumeRole["external_id"].(string)
-
+		if v := assumeRole["duration_seconds"].(int); v != 0 {
+			config.AssumeRoleDurationSeconds = v
+		} else {
+			config.AssumeRoleDurationSeconds = 1800 // default to 30 mins not 15..
+		}
 		if v := assumeRole["policy"].(string); v != "" {
 			config.AssumeRolePolicy = v
 		}
@@ -195,6 +208,12 @@ func assumeRoleSchema() *schema.Schema {
 					Type:        schema.TypeString,
 					Optional:    true,
 					Description: descriptions["assume_role_session_name"],
+				},
+
+				"duration_seconds": {
+					Type:        schema.TypeInt,
+					Optional:    true,
+					Description: descriptions["assume_role_duration_seconds"],
 				},
 
 				"external_id": {

@@ -1,47 +1,48 @@
 package appstream
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/endpoints"
 	"github.com/aws/aws-sdk-go/service/appstream"
 	"github.com/aws/aws-sdk-go/service/imagebuilder"
 	awsbase "github.com/hashicorp/aws-sdk-go-base"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/logging"
-	"fmt"
-	"log"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
 )
 
-
 type Config struct {
-        AccessKey     string
-        SecretKey     string
-        CredsFilename string
-        Profile       string
-        Token         string
-        Region        string
-        MaxRetries    int
+	AccessKey     string
+	SecretKey     string
+	CredsFilename string
+	Profile       string
+	Token         string
+	Region        string
+	MaxRetries    int
 
-        AssumeRoleARN         string
-        AssumeRoleExternalID  string
-        AssumeRoleSessionName string
-        AssumeRolePolicy      string
+	AssumeRoleARN             string
+	AssumeRoleDurationSeconds int
+	AssumeRoleExternalID      string
+	AssumeRoleSessionName     string
+	AssumeRolePolicy          string
 
-        AllowedAccountIds   []string
-        ForbiddenAccountIds []string
+	AllowedAccountIds   []string
+	ForbiddenAccountIds []string
 
-        Endpoints        map[string]string
+	Endpoints         map[string]string
 	IgnoreTagPrefixes []string
 	IgnoreTags        []string
-        Insecure         bool
+	Insecure          bool
 
-        SkipCredsValidation     bool
-        SkipGetEC2Platforms     bool
-        SkipRegionValidation    bool
-        SkipRequestingAccountId bool
-        SkipMetadataApiCheck    bool
-        S3ForcePathStyle        bool
+	SkipCredsValidation     bool
+	SkipGetEC2Platforms     bool
+	SkipRegionValidation    bool
+	SkipRequestingAccountId bool
+	SkipMetadataApiCheck    bool
+	S3ForcePathStyle        bool
 
-        terraformVersion string
+	terraformVersion string
 }
 
 type AWSClient struct {
@@ -119,14 +120,14 @@ func (c *Config) Client() (interface{}, error) {
 	dnsSuffix := "amazonaws.com"
 	if p, ok := endpoints.PartitionForRegion(endpoints.DefaultPartitions(), c.Region); ok {
 		dnsSuffix = p.DNSSuffix()
-        }
-        
+	}
+
 	client := &AWSClient{
 		accountid:        accountID,
 		appstreamconn:    appstream.New(sess.Copy(&aws.Config{Endpoint: aws.String(c.Endpoints["appstream"])})),
-        dnsSuffix:        dnsSuffix,
+		dnsSuffix:        dnsSuffix,
 		imagebuilderconn: imagebuilder.New(sess.Copy(&aws.Config{Endpoint: aws.String(c.Endpoints["imagebuilder"])})),
-        partition:        partition,
+		partition:        partition,
 		region:           c.Region,
 		terraformVersion: c.terraformVersion,
 	}
