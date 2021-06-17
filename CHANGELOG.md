@@ -1,5 +1,6 @@
 ## WIP (**UNRELEASED**)
 
+## 2.0.1 (June 17, 2021)
 FEATURES:
 * [nparfait] appstream/resource_fleet.go - state, stream_view
 * [nparfait] appstream/resource_image_builder.go - access_endpoints
