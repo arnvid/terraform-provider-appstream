@@ -134,9 +134,10 @@ resource "appstream_fleet" "test_fleet" {
   }
   tags = {
     Env  = "lab"
-    Role = "appstream-fleet"
+    Role = "appstream-test-fleet"
     Terraform = "true"
     Environment = "dev"
+    Project = "ISD"
   }
   state = "RUNNING"
 }

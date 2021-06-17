@@ -79,12 +79,14 @@ func resourceAppstreamFleet() *schema.Resource {
 			"image_arn": {
 				Type:          schema.TypeString,
 				Optional:      true,
+				Computed:	   true,							
 				ConflictsWith: []string{"image_name"},
 			},
 
 			"image_name": {
 				Type:          schema.TypeString,
 				Optional:      true,
+				Computed:	   true,							
 				ConflictsWith: []string{"image_arn"},
 			},
 
