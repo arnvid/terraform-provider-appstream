@@ -1,7 +1,7 @@
 ## Terraform AppStream 2.0 provider
 # terraform-provider-appstream
 
-
+[![release](https://github.com/arnvid/terraform-provider-appstream/actions/workflows/release.yml/badge.svg)](https://github.com/arnvid/terraform-provider-appstream/actions/workflows/release.yml)
 
 
 +This is an updated Terraform Appstream provider that covers almost all AWS SDK operations on Appstream service. This fork attempts to build a suitable provider that conforms as clossely as possible terraform provider standards.
